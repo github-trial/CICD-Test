@@ -8,5 +8,5 @@ I have kept it as user input variable so that the template is generic and not de
   * https://s3.amazonaws.com/testing-java-jdk/airports101.ps1
   * https://s3.amazonaws.com/testing-java-jdk/airports110.ps1
   * https://s3.amazonaws.com/testing-java-jdk/jdk-8u181-windows-x64.exe (jdk exe)
-> Currently in the template it download the respective powershell file and runs in their respective VMs
+> Currently in the template it downloads the respective powershell file and runs in the respective VMs
 ## Parameters.json file is mainly for automation via VSTS.

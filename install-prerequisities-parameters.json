@@ -1,0 +1,30 @@
+[
+  {
+    "ParameterKey": "ApplicationID",
+    "ParameterValue": "app001"
+  },
+  {
+    "ParameterKey": "VPCID",
+    "ParameterValue": "vpc-4bb6d630"
+  },
+  {
+    "ParameterKey": "KeyPairName",
+    "ParameterValue": "test"
+  },
+  {
+    "ParameterKey": "SubnetID",
+    "ParameterValue": "subnet-f0f120ba"
+  },
+  {
+    "ParameterKey": "VMInstanceType",
+    "ParameterValue": "t2.micro"
+  },
+  {
+    "ParameterKey": "ImageIdRDGW",
+    "ParameterValue": "ami-0b7b74ba8473ec232"
+  },
+  {
+    "ParameterKey": "IAMRole",
+    "ParameterValue": "SSM"
+  }
+]

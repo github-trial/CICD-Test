@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  This template is intended to be installed into an existing VPC with two public
+  subnets and an Active Directory domain. It will create an auto-scaling group
+  of RD Gateway instances in the public VPC subnets. **WARNING** This template
+  creates Amazon EC2 Windows instance and related resources. You will be billed
+  for the AWS resources used if you create a stack from this template. QS(0006)
+Parameters:
+  ApplicationID:
+    Type: String
+    Default: sss001
+    MinLength: 3
+    MaxLength: 30
+    Description: Enter Application ID
+  VPCID:
+    Type: String
+    Default: VPC-1415861
+    MinLength: 0
+    MaxLength: 40
+    Description: >-
+      Enter The VPC ID
+  KeyPairName:
+    Description: Takes the valid Key from the respective name of the parameter store.
+    Type: String
+    Default: Key_Name
+  SubnetID:
+    Description: Takes the valid Key from the respective name of the parameter store.
+    Type: String
+  VMInstanceType:
+    Description: Amazon EC2 instance type for the Remote Desktop Gateway instances
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.medium
+      - t2.large
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.4xlarge
+  ImageIdRDGW:
+    Description: Takes the valid ami from the rspective name of the parameter store.
+    Type: String
+    Default: ami12345
+    Description: >-
+      Choose true if you want to enable Vulnerability Scan of the resource else enter false
+  IAMRole:
+    Description: Attach a role for SSM access
+    Type: String
+    Default: SSM    
+Resources:  
+  Ec2Instance1:
+    Type: 'AWS::EC2::Instance'     
+    Properties:
+      InstanceType: !Ref VMInstanceType
+      ImageId: !Ref ImageIdRDGW
+      IamInstanceProfile: !Ref IAMRole    
+      KeyName: !Ref KeyPairName
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - '-'
+            - - !Ref ApplicationID
+              - '001'          
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref RemoteDesktopGatewaySG
+          AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId: !Ref SubnetID
+      UserData: 
+       Fn::Base64:
+           !Sub |
+               <powershell>
+               $c1 = "https://s3.amazonaws.com/testing-java-jdk/countries.ps1"
+               $c_path = "C:\countries.ps1"
+               [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+               $webClient = new-object System.Net.WebClient
+               $webClient.DownloadFile("$c1","$c_path")
+               C:\countries.ps1 
+               get-service AmazonSSMAgent -EA SilentlyContinue
+               </powershell>
+               <persist>
+               </persist>
+  Ec2Instance2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref VMInstanceType
+      ImageId: !Ref ImageIdRDGW
+      IamInstanceProfile: !Ref IAMRole
+      KeyName: !Ref KeyPairName
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - '-'
+            - - !Ref ApplicationID
+              - '002'          
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref RemoteDesktopGatewaySG
+          AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId: !Ref SubnetID
+      UserData: 
+       Fn::Base64:
+           !Sub |
+               <powershell>
+               $a1 = "https://s3.amazonaws.com/testing-java-jdk/airports101.ps1"
+               $a_path = "C:\airports101.ps1"
+               [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+               $webClient = new-object System.Net.WebClient
+               $webClient.DownloadFile("$a1","$a_path")
+               C:\airports101.ps1 
+               get-service AmazonSSMAgent -EA SilentlyContinue
+               </powershell>
+               <persist>
+               </persist>
+  Ec2Instance3:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref VMInstanceType
+      ImageId: !Ref ImageIdRDGW
+      IamInstanceProfile: !Ref IAMRole
+      KeyName: !Ref KeyPairName
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - '-'
+            - - !Ref ApplicationID
+              - '003'          
+      NetworkInterfaces:
+        - GroupSet:
+            - !Ref RemoteDesktopGatewaySG
+          AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          DeleteOnTermination: 'true'
+          SubnetId: !Ref SubnetID
+      UserData: 
+       Fn::Base64:
+           !Sub |            
+               <powershell>
+               $a1 = "https://s3.amazonaws.com/testing-java-jdk/airports110.ps1"
+               $a_path = "C:\airports110.ps1"
+               [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
+               $webClient = new-object System.Net.WebClient
+               $webClient.DownloadFile("$a1","$a_path")
+               C:\airports110.ps1 
+               get-service AmazonSSMAgent -EA SilentlyContinue
+               </powershell>
+               <persist>
+               </persist>           
+  RemoteDesktopGatewaySG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable RDP access from the Internet
+      VpcId: !Ref VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '3389'
+          ToPort: '3389'            
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '8080'
+          ToPort: '8080'            
+          CidrIp: 0.0.0.0/0          
+        - IpProtocol: icmp
+          FromPort: '0'
+          ToPort: '-1'            
+          CidrIp: 0.0.0.0/0          
+      Tags:
+        - Key: Name
+          Value: !Join 
+            - '-'
+            - - !Ref ApplicationID
+              -  'sg'
